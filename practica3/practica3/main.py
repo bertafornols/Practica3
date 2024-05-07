@@ -58,3 +58,66 @@ def main(args=None):
 if __name__ == '__main__':
     main()
 
+#!/usr/bin/env python
+
+import rospy
+from geometry_msgs.msg import Twist
+from turtlesim.msg import Pose
+from math import atan2, sqrt
+
+class TurtleController:
+
+    def __init__(self):
+        # Inicializar el nodo de ROS
+        rospy.init_node('turtle_controller', anonymous=True)
+
+        # Suscribirse al tópico de la posición de la tortuga
+        rospy.Subscriber('/turtle1/pose', Pose, self.update_pose)
+
+        # Publicar en el tópico de control de velocidad para mover la tortuga
+        self.velocity_publisher = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
+
+        self.pose = Pose()
+        self.rate = rospy.Rate(10)
+
+    def update_pose(self, data):
+        # Callback para actualizar la posición actual de la tortuga
+        self.pose = data
+        self.pose.x = round(self.pose.x, 4)
+        self.pose.y = round(self.pose.y, 4)
+
+    def set_turtle_position(self, x, y):
+        # Función para mover la tortuga a una posición específica
+        goal_pose = Pose()
+        goal_pose.x = x
+        goal_pose.y = y
+
+        # Calcular la dirección hacia la posición objetivo
+        dx = goal_pose.x - self.pose.x
+        dy = goal_pose.y - self.pose.y
+        distance = sqrt(dx**2 + dy**2)
+        velocity = Twist()
+
+        while distance > 0.1:
+            # Calcular la velocidad lineal y angular para moverse hacia la posición objetivo
+            velocity.linear.x = 1.5 * distance
+            velocity.angular.z = 4 * (atan2(dy, dx) - self.pose.theta)
+            
+            # Publicar el comando de velocidad
+            self.velocity_publisher.publish(velocity)
+            
+            # Actualizar la distancia a la posición objetivo
+            dx = goal_pose.x - self.pose.x
+            dy = goal_pose.y - self.pose.y
+            distance = sqrt(dx**2 + dy**2)
+            
+            # Dormir durante un breve período para controlar la velocidad de la tortuga
+            self.rate.sleep()
+
+        # Una vez que la tortuga alcanza la posición objetivo, detenerla
+        velocity.linear.x = 0
+        velocity.angular.z = 0
+        self.velocity_publisher.publish(velocity)
+
+
+

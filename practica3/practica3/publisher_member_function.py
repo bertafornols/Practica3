@@ -24,20 +24,18 @@ class MinimalPublisher(Node):
 
     def __init__(self):
         super().__init__('minimal_publisher')
-        self.publisher_ = self.create_publisher(Twist, '/turtle1/cmd_vel', 10)
+        self.publisher_ = self.create_publisher(Twist, '/turtle2/cmd_vel', 10)
+        self.publisher1_ = self.create_publisher(Twist, '/turtle1/cmd_vel', 10)
+        self.publisher3_ = self.create_publisher(Twist, '/turtle3/cmd_vel', 10)
         timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
 
     def timer_callback(self):
         #INDICAMOS A QUE VELOCIDAD QUEREMOS QUE SE MUEVA
-        msg = Twist()
-        msg.linear.x = 0.5 #escoger a que velocidad queremos que se mueva
-        msg.angular.z = 0.2 #escoger velocidad para girar
-        self.publisher_.publish(msg)
+
         self.get_logger().info(f'velocity linear.x: {msg.linear.x} angular.z: {msg.angular.z}')
 
-        #tiene que indicar a que posición y con que velocidad
 
 def main(args=None):
     rclpy.init(args=args)

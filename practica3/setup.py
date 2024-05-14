@@ -20,6 +20,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'general = practica3.controller:main',
+            'talker = practica3.publisher_member_function:main',
+            'listener = practica3.subscriber_member_function:main',
         ],
     },
 )
